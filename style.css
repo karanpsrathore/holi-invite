@@ -1,57 +1,62 @@
+* {
+  box-sizing: border-box;
+}
+
 body {
-  height: 100vh;
   margin: 0;
+  height: 100vh;
+  background: #fff4e6;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
   display: flex;
   justify-content: center;
   align-items: center;
-  font-family: Arial, sans-serif;
-  background: #fff6e9;
-  text-align: center;
-  overflow: hidden;
 }
 
-#container {
+.container {
+  text-align: center;
   position: relative;
   width: 100%;
+  height: 100%;
 }
 
 h1 {
+  font-size: 32px;
   margin-bottom: 30px;
+}
+
+#tease {
+  margin-top: 18px;
+  font-size: 18px;
+  color: #444;
+  min-height: 24px;
 }
 
 .buttons {
   position: relative;
-  height: 160px;
+  width: 100%;
+  height: 300px;
 }
 
 button {
-  font-size: 20px;
-  padding: 14px 40px;
   border: none;
-  border-radius: 12px;
+  border-radius: 14px;
+  padding: 18px 40px;
+  font-size: 18px;
   cursor: pointer;
-  transition: transform 0.35s ease;
+  transition: transform 0.35s ease, background-color 0.35s ease;
+  position: absolute;
 }
 
 #yes {
-  background: #f6b7c9;
-}
-
-#yes:hover {
-  transform: scale(1.15);
+  background: #f8b4c6;
+  left: 50%;
+  top: 100px;
+  transform: translateX(-50%) scale(1);
 }
 
 #no {
   background: #eaeaea;
-  position: absolute;
-  left: 55%;
-  top: 0;
-}
-
-#tease {
-  margin-top: 22px;
-  font-size: 15px;
-  color: #555;
-  min-height: 22px;
-  transition: opacity 0.3s ease;
+  left: 50%;
+  top: 180px;
+  transform: translateX(-50%) scale(1);
 }
