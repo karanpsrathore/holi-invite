@@ -48,7 +48,7 @@ button {
   background: #f8b4c6;
   left: 50%;
   top: 100px;
-  transform: translateX(-50%);
+  transform: translateX(-50%) scale(1);
 }
 
 #no {
