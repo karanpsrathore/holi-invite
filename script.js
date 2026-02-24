@@ -43,7 +43,7 @@ function unlockAudio() {
 document.addEventListener("click", unlockAudio, { once: true });
 document.addEventListener("mousemove", unlockAudio, { once: true });
 
-noBtn.addEventListener("mouseenter", () => {
+noBtn.addEventListener("mouseover", () => {
   hoverCount++;
 
   if (audioUnlocked && !page1MusicStarted) {
@@ -54,8 +54,8 @@ noBtn.addEventListener("mouseenter", () => {
   const yesScale = Math.min(1 + hoverCount * 0.2, 3);
   const noScale = Math.max(1 - hoverCount * 0.08, 0.15);
 
-  yesBtn.style.transform = `scale(${yesScale})`;
-  noBtn.style.transform = `translate(${rand(-120,120)}px, ${rand(-60,60)}px) scale(${noScale})`;
+  yesBtn.style.transform = `translateX(-50%) scale(${yesScale})`;
+  noBtn.style.transform = `translate(${rand(-100,100)}px, ${rand(-60,60)}px) scale(${noScale})`;
 
   tease.textContent = teaseLines[Math.min(hoverCount - 1, teaseLines.length - 1)];
 });
