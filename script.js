@@ -9,34 +9,58 @@ const mainScreen = document.getElementById("main-screen");
 const finalScreen = document.getElementById("final-screen");
 const gifEl = document.getElementById("gif");
 
+/* ------------------ PAGE 1 LOGIC ------------------ */
+
 let hoverCount = 0;
-let page1Started = false;
+let audioUnlocked = false;
+let page1MusicStarted = false;
 
 const teaseLines = [
   "Come on… it’ll be colourful 🌸",
   "Just you, me, and gulaal 💗",
   "I promise I’ll make you smile",
+  "We’ll make memories, not messes",
   "It wouldn’t be the same without you",
-  "Say yes… pretty please?"
+  "I’m already imagining it with you",
+  "Say yes… pretty please?",
+  "You’re really enjoying this, aren’t you 😌",
+  "Okay, now you’re just teasing me",
+  "Please give me a chance 🥹"
 ];
+
+/* UNLOCK AUDIO ON FIRST REAL GESTURE */
+function unlockAudio() {
+  if (audioUnlocked) return;
+  audioUnlocked = true;
+
+  page1Audio.volume = 0.7;
+  page1Audio.play().then(() => {
+    page1Audio.pause();
+    page1Audio.currentTime = 0;
+  }).catch(() => {});
+}
+
+document.addEventListener("click", unlockAudio, { once: true });
+document.addEventListener("mousemove", unlockAudio, { once: true });
 
 noBtn.addEventListener("mouseenter", () => {
   hoverCount++;
 
-  if (!page1Started) {
-    page1Audio.volume = 0.7;
+  if (audioUnlocked && !page1MusicStarted) {
     page1Audio.play().catch(() => {});
-    page1Started = true;
+    page1MusicStarted = true;
   }
 
   const yesScale = Math.min(1 + hoverCount * 0.2, 3);
   const noScale = Math.max(1 - hoverCount * 0.08, 0.15);
 
-  yesBtn.style.transform = `translateX(-50%) scale(${yesScale})`;
+  yesBtn.style.transform = `scale(${yesScale})`;
   noBtn.style.transform = `translate(${rand(-120,120)}px, ${rand(-60,60)}px) scale(${noScale})`;
 
   tease.textContent = teaseLines[Math.min(hoverCount - 1, teaseLines.length - 1)];
 });
+
+/* ------------------ PAGE 2 LOGIC ------------------ */
 
 yesBtn.addEventListener("click", () => {
   page1Audio.pause();
@@ -51,7 +75,8 @@ yesBtn.addEventListener("click", () => {
   playGifs();
 });
 
-/* GIF SEQUENCE (PUT YOUR LINKS BACK HERE) */
+/* ------------------ GIF SEQUENCE ------------------ */
+
 const gifs = [
   "https://media0.giphy.com/media/v1.Y2lkPTc5MGI3NjExdHJydXd1cjBveTJsNjFpamtsMzc1MGI1YjhueWExc2c0cjRyeGVkaCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/jIUe9WT7p1X5cdU3hM/giphy.gif",
   "https://media1.giphy.com/media/v1.Y2lkPTc5MGI3NjExMDByNXh6cXJveHVtaW5lNDJuZzZiZjF3aml5dndxYnowMWRsYjNmbyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/C4bqFGCVg9L4cPLPhF/giphy.gif",
@@ -78,6 +103,8 @@ function playGifs() {
     playGifs();
   }, durations[gifIndex]);
 }
+
+/* ------------------ UTIL ------------------ */
 
 function rand(min, max) {
   return Math.random() * (max - min) + min;
