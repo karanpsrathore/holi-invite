@@ -1,30 +1,21 @@
-/* ===============================
-   AUDIO SETUP
-================================ */
-const page1Audio = document.getElementById("page1Audio");
-const page2Audio = document.getElementById("page2Audio");
-
-let page1MusicStarted = false;
-
-/* ===============================
-   ELEMENT REFERENCES
-================================ */
 const noBtn = document.getElementById("no");
 const yesBtn = document.getElementById("yes");
 
 const mainScreen = document.getElementById("main-screen");
 const finalScreen = document.getElementById("final-screen");
-const gifImg = document.getElementById("gif");
+
 const tease = document.getElementById("tease");
 
-/* ===============================
-   STATE
-================================ */
+const page1Audio = document.getElementById("page1Audio");
+const page2Audio = document.getElementById("page2Audio");
+
+const gif = document.getElementById("gif");
+
+/* ---- MUSIC STATE ---- */
+let page1MusicStarted = false;
 let hoverCount = 0;
 
-/* ===============================
-   TEASE TEXT
-================================ */
+/* ---- TEASE TEXT ---- */
 const teaseLines = [
   "Come on… it’ll be colourful 🌸",
   "Just you, me, and gulaal 💗",
@@ -38,104 +29,76 @@ const teaseLines = [
   "Please give me a chance 🥹"
 ];
 
-/* ===============================
-   NO BUTTON — HOVER LOGIC
-================================ */
-noBtn.addEventListener("mouseenter", () => {
-  hoverCount++;
+/* ---- GIFS + TIMINGS (ms) ---- */
+const gifs = [
+  { src: "soccer win.gif", time: 1300 },
+  { src: "spiderman.gif", time: 500 },
+  { src: "rick roll.gif", time: 700 },
+  { src: "explosion.gif", time: 2600 },
+  { src: "excited.gif", time: 900 },
+  { src: "surprised.gif", time: 3800 },
+  { src: "cat.gif", time: 3400 },
+  { src: "bean.gif", time: 3050 },
+  { src: "fireworks.gif", time: 1600 }
+];
 
-  /* --- START PAGE 1 MUSIC ON FIRST HOVER --- */
+let gifIndex = 0;
+
+/* ---- NO HOVER ---- */
+noBtn.addEventListener("mouseenter", () => {
+  /* START PAGE 1 MUSIC ONLY ON FIRST HOVER */
   if (!page1MusicStarted) {
     page1Audio.volume = 0.7;
     page1Audio.play().catch(() => {});
     page1MusicStarted = true;
   }
 
-  /* --- YES BUTTON GROW --- */
+  hoverCount++;
+
+  /* YES GROWS */
   const yesScale = Math.min(1 + hoverCount * 0.2, 3);
   yesBtn.style.transform = `translateX(-50%) scale(${yesScale})`;
 
-  /* --- NO BUTTON SHRINK + MOVE (CLAMPED) --- */
+  /* NO SHRINKS + MOVES (CLAMPED) */
   const noScale = Math.max(1 - hoverCount * 0.08, 0.15);
+  const x = clamp(random(-120, 120), -160, 160);
+  const y = clamp(random(-60, 60), -100, 100);
 
-  const { x, y } = getClampedPosition(noBtn);
+  noBtn.style.transform = `translate(${x}px, ${y}px) scale(${noScale})`;
 
-  noBtn.style.transform = `
-    translate(${x}px, ${y}px)
-    scale(${noScale})
-  `;
-
-  /* --- TEASE TEXT --- */
-  tease.textContent =
-    teaseLines[Math.min(hoverCount - 1, teaseLines.length - 1)];
+  tease.textContent = teaseLines[Math.min(hoverCount - 1, teaseLines.length - 1)];
 });
 
-/* ===============================
-   YES BUTTON — CLICK LOGIC
-================================ */
+/* ---- YES CLICK ---- */
 yesBtn.addEventListener("click", () => {
-  /* Stop page 1 music */
   page1Audio.pause();
   page1Audio.currentTime = 0;
 
-  /* Switch screens */
   mainScreen.classList.add("hidden");
   finalScreen.classList.remove("hidden");
 
-  /* Start page 2 music */
   page2Audio.volume = 0.8;
   page2Audio.play().catch(() => {});
 
-  /* Start GIF carousel */
-  startGifCarousel();
+  playNextGif();
 });
 
-/* ===============================
-   NO BUTTON MOVEMENT (CLAMPED)
-================================ */
-function getClampedPosition(button) {
-  const maxX = window.innerWidth / 2 - 120;
-  const maxY = window.innerHeight / 2 - 180;
-
-  const x = Math.max(
-    -maxX,
-    Math.min(maxX, Math.random() * 240 - 120)
-  );
-
-  const y = Math.max(
-    -maxY,
-    Math.min(maxY, Math.random() * 120 - 60)
-  );
-
-  return { x, y };
-}
-
-/* ===============================
-   FINAL PAGE GIF CAROUSEL
-================================ */
-const gifs = [
-  { src: "gifs/gif1.gif", time: 1300 },
-  { src: "gifs/gif2.gif", time: 500 },
-  { src: "gifs/gif3.gif", time: 700 },
-  { src: "gifs/gif4.gif", time: 2600 },
-  { src: "gifs/gif5.gif", time: 900 },
-  { src: "gifs/gif6.gif", time: 3800 },
-  { src: "gifs/gif7.gif", time: 3400 },
-  { src: "gifs/gif8.gif", time: 3050 },
-  { src: "gifs/gif9.gif", time: 1600 }
-];
-
-let gifIndex = 0;
-
-function startGifCarousel() {
-  showGif();
-}
-
-function showGif() {
-  gifImg.src = gifs[gifIndex].src;
+/* ---- GIF LOOP ---- */
+function playNextGif() {
+  const current = gifs[gifIndex];
+  gif.src = current.src;
 
   setTimeout(() => {
     gifIndex = (gifIndex + 1) % gifs.length;
-    showGif();
-  }, gifs[gifIndex].time);
+    playNextGif();
+  }, current.time);
+}
+
+/* ---- HELPERS ---- */
+function random(min, max) {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+function clamp(val, min, max) {
+  return Math.max(min, Math.min(max, val));
 }
