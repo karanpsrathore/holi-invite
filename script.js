@@ -35,7 +35,7 @@ const teaseLines = [
   "Say yes… pretty please?",
   "You’re really enjoying this, aren’t you 😌",
   "Okay, now you’re just teasing me",
-  "Alright… last chance 😳"
+  "Please give me a chance 🥹"
 ];
 
 /* ===============================
