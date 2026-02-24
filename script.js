@@ -1,21 +1,38 @@
-const noBtn = document.getElementById("no");
 const yesBtn = document.getElementById("yes");
+const noBtn = document.getElementById("no");
 
 const mainScreen = document.getElementById("main-screen");
 const finalScreen = document.getElementById("final-screen");
 
 const tease = document.getElementById("tease");
+const gif = document.getElementById("gif");
 
 const page1Audio = document.getElementById("page1Audio");
 const page2Audio = document.getElementById("page2Audio");
 
-const gif = document.getElementById("gif");
+/* -------------------------
+   AUDIO UNLOCK (CRITICAL)
+-------------------------- */
+let audioUnlocked = false;
+document.addEventListener(
+  "mousemove",
+  () => {
+    if (!audioUnlocked) {
+      page1Audio.play().catch(() => {});
+      page1Audio.pause();
+      page1Audio.currentTime = 0;
+      audioUnlocked = true;
+    }
+  },
+  { once: true }
+);
 
-/* ---- MUSIC STATE ---- */
-let page1MusicStarted = false;
+/* -------------------------
+   PAGE 1 LOGIC
+-------------------------- */
 let hoverCount = 0;
+let page1MusicStarted = false;
 
-/* ---- TEASE TEXT ---- */
 const teaseLines = [
   "Come on… it’ll be colourful 🌸",
   "Just you, me, and gulaal 💗",
@@ -29,24 +46,8 @@ const teaseLines = [
   "Please give me a chance 🥹"
 ];
 
-/* ---- GIFS + TIMINGS (ms) ---- */
-const gifs = [
-  { src: "soccer win.gif", time: 1300 },
-  { src: "spiderman.gif", time: 500 },
-  { src: "rick roll.gif", time: 700 },
-  { src: "explosion.gif", time: 2600 },
-  { src: "excited.gif", time: 900 },
-  { src: "surprised.gif", time: 3800 },
-  { src: "cat.gif", time: 3400 },
-  { src: "bean.gif", time: 3050 },
-  { src: "fireworks.gif", time: 1600 }
-];
-
-let gifIndex = 0;
-
-/* ---- NO HOVER ---- */
 noBtn.addEventListener("mouseenter", () => {
-  /* START PAGE 1 MUSIC ONLY ON FIRST HOVER */
+  // Start page 1 music ONLY once
   if (!page1MusicStarted) {
     page1Audio.volume = 0.7;
     page1Audio.play().catch(() => {});
@@ -55,21 +56,28 @@ noBtn.addEventListener("mouseenter", () => {
 
   hoverCount++;
 
-  /* YES GROWS */
+  // YES grows
   const yesScale = Math.min(1 + hoverCount * 0.2, 3);
   yesBtn.style.transform = `translateX(-50%) scale(${yesScale})`;
 
-  /* NO SHRINKS + MOVES (CLAMPED) */
+  // NO shrinks + moves but stays on screen
   const noScale = Math.max(1 - hoverCount * 0.08, 0.15);
-  const x = clamp(random(-120, 120), -160, 160);
-  const y = clamp(random(-60, 60), -100, 100);
+
+  const maxX = window.innerWidth / 2 - 120;
+  const maxY = 80;
+
+  const x = Math.random() * maxX * 2 - maxX;
+  const y = Math.random() * maxY * 2 - maxY;
 
   noBtn.style.transform = `translate(${x}px, ${y}px) scale(${noScale})`;
 
-  tease.textContent = teaseLines[Math.min(hoverCount - 1, teaseLines.length - 1)];
+  tease.textContent =
+    teaseLines[Math.min(hoverCount - 1, teaseLines.length - 1)];
 });
 
-/* ---- YES CLICK ---- */
+/* -------------------------
+   PAGE 2 TRANSITION
+-------------------------- */
 yesBtn.addEventListener("click", () => {
   page1Audio.pause();
   page1Audio.currentTime = 0;
@@ -80,25 +88,35 @@ yesBtn.addEventListener("click", () => {
   page2Audio.volume = 0.8;
   page2Audio.play().catch(() => {});
 
-  playNextGif();
+  startGifLoop();
 });
 
-/* ---- GIF LOOP ---- */
-function playNextGif() {
-  const current = gifs[gifIndex];
-  gif.src = current.src;
+/* -------------------------
+   GIF LOOP (EXTERNAL LINKS)
+-------------------------- */
+const gifs = [
+  { src: "https://media0.giphy.com/media/v1.Y2lkPTc5MGI3NjExdHJydXd1cjBveTJsNjFpamtsMzc1MGI1YjhueWExc2c0cjRyeGVkaCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/jIUe9WT7p1X5cdU3hM/giphy.gif", time: 1300 },
+  { src: "https://media1.giphy.com/media/v1.Y2lkPTc5MGI3NjExMDByNXh6cXJveHVtaW5lNDJuZzZiZjF3aml5dndxYnowMWRsYjNmbyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/C4bqFGCVg9L4cPLPhF/giphy.gif", time: 500 },
+  { src: "https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExMnJhN2E4b3EzaTU3eHdvNnMya2Q4OWx0anZ4ZG1tOGV0ZGU2cDMydyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/lgcUUCXgC8mEo/giphy.gif", time: 700 },
+  { src: "https://media0.giphy.com/media/v1.Y2lkPTc5MGI3NjExb2Jlbmhrb2lpazlpYjB2ZzFzc3psbWNndTc3emduaTBiZ281dWJzYSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/qCbxDK31NoH03SwomM/giphy.gif", time: 2600 },
+  { src: "https://media1.giphy.com/media/v1.Y2lkPTc5MGI3NjExNnp6YWMwY2RteGtrM2g4bjZiNmthM3ZreHQycWFyczNzeGswNDh6NiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/tgSPq03054DTy/giphy.gif", time: 900 },
+  { src: "https://media0.giphy.com/media/v1.Y2lkPTc5MGI3NjExYXk3b3BwbXcwazh5NmNkMDYyODR0cHB4b3QybWc3cWFhazUzdDZmOCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/lxxOGaDRk4f7R5TkBd/giphy.gif", time: 3800 },
+  { src: "https://media0.giphy.com/media/v1.Y2lkPTc5MGI3NjExamY0ZDVqY2RqbDZ4eDN5MTR1d2tjOWVyc3FrcXlzcWhpYWdrOG5hMyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/iXbnkZTxCo4t8l8mxK/giphy.gif", time: 3400 },
+  { src: "https://media2.giphy.com/media/v1.Y2lkPTc5MGI3NjExcG53Ynl6NzNycXNscGZkemVxN2t4dTRudDk4MXB1dHJmaWdxMXNzNCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/fQvs6RzNAfWnga6f6I/giphy.gif", time: 3050 },
+  { src: "https://media2.giphy.com/media/v1.Y2lkPTc5MGI3NjExMzdiZms1OXdtYjg1a3VjbTBndnU3ZWwwejAweDRhY2JvZm93bmMzNyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/yziuK6WtDFMly/giphy.gif", time: 1600 }
+];
 
-  setTimeout(() => {
-    gifIndex = (gifIndex + 1) % gifs.length;
-    playNextGif();
-  }, current.time);
-}
+let gifIndex = 0;
 
-/* ---- HELPERS ---- */
-function random(min, max) {
-  return Math.floor(Math.random() * (max - min + 1)) + min;
-}
+function startGifLoop() {
+  function showNextGif() {
+    gif.src = gifs[gifIndex].src;
 
-function clamp(val, min, max) {
-  return Math.max(min, Math.min(max, val));
+    setTimeout(() => {
+      gifIndex = (gifIndex + 1) % gifs.length;
+      showNextGif();
+    }, gifs[gifIndex].time);
+  }
+
+  showNextGif();
 }
