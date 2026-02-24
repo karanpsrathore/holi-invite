@@ -1,101 +1,141 @@
-/* ELEMENTS */
-const yesBtn = document.getElementById("yes");
+/* ===============================
+   AUDIO SETUP
+================================ */
+const page1Audio = document.getElementById("page1Audio");
+const page2Audio = document.getElementById("page2Audio");
+
+let page1MusicStarted = false;
+
+/* ===============================
+   ELEMENT REFERENCES
+================================ */
 const noBtn = document.getElementById("no");
-const tease = document.getElementById("tease");
+const yesBtn = document.getElementById("yes");
 
 const mainScreen = document.getElementById("main-screen");
 const finalScreen = document.getElementById("final-screen");
-const gifEl = document.getElementById("gif");
+const gifImg = document.getElementById("gif");
+const tease = document.getElementById("tease");
 
-/* STATE */
+/* ===============================
+   STATE
+================================ */
 let hoverCount = 0;
-let noX = 0;
-let noY = 0;
 
-/* TEASE TEXT */
+/* ===============================
+   TEASE TEXT
+================================ */
 const teaseLines = [
   "Come on… it’ll be colourful 🌸",
   "Just you, me, and gulaal 💗",
   "I promise I’ll make you smile",
+  "We’ll make memories, not messes",
   "It wouldn’t be the same without you",
   "I’m already imagining it with you",
-  "Say yes… please?",
-  "You know you want to 😌",
-  "Almost there…",
-  "Okay I’m waiting ❤️",
-  "That’s it 😳"
+  "Say yes… pretty please?",
+  "You’re really enjoying this, aren’t you 😌",
+  "Okay, now you’re just teasing me",
+  "Alright… last chance 😳"
 ];
 
-/* NO BUTTON HOVER LOGIC */
+/* ===============================
+   NO BUTTON — HOVER LOGIC
+================================ */
 noBtn.addEventListener("mouseenter", () => {
   hoverCount++;
 
-  /* YES grows */
-  const yesScale = Math.min(1 + hoverCount * 0.25, 3.5);
+  /* --- START PAGE 1 MUSIC ON FIRST HOVER --- */
+  if (!page1MusicStarted) {
+    page1Audio.volume = 0.7;
+    page1Audio.play().catch(() => {});
+    page1MusicStarted = true;
+  }
+
+  /* --- YES BUTTON GROW --- */
+  const yesScale = Math.min(1 + hoverCount * 0.2, 3);
   yesBtn.style.transform = `translateX(-50%) scale(${yesScale})`;
 
-  /* NO shrinks */
+  /* --- NO BUTTON SHRINK + MOVE (CLAMPED) --- */
   const noScale = Math.max(1 - hoverCount * 0.08, 0.15);
 
-  /* MOVE NO — CLAMPED TO VIEWPORT */
-  const moveX = random(-140, 140);
-  const moveY = random(-70, 70);
+  const { x, y } = getClampedPosition(noBtn);
 
-  noX += moveX;
-  noY += moveY;
+  noBtn.style.transform = `
+    translate(${x}px, ${y}px)
+    scale(${noScale})
+  `;
 
-  const maxX = window.innerWidth / 2 - noBtn.offsetWidth;
-  const maxY = 200; // vertical play area
-
-  noX = clamp(noX, -maxX, maxX);
-  noY = clamp(noY, -maxY, maxY);
-
-  noBtn.style.transform = `translate(${noX}px, ${noY}px) scale(${noScale})`;
-
+  /* --- TEASE TEXT --- */
   tease.textContent =
     teaseLines[Math.min(hoverCount - 1, teaseLines.length - 1)];
 });
 
-/* YES CLICK */
+/* ===============================
+   YES BUTTON — CLICK LOGIC
+================================ */
 yesBtn.addEventListener("click", () => {
+  /* Stop page 1 music */
+  page1Audio.pause();
+  page1Audio.currentTime = 0;
+
+  /* Switch screens */
   mainScreen.classList.add("hidden");
   finalScreen.classList.remove("hidden");
-  startGifLoop();
+
+  /* Start page 2 music */
+  page2Audio.volume = 0.8;
+  page2Audio.play().catch(() => {});
+
+  /* Start GIF carousel */
+  startGifCarousel();
 });
 
-/* GIFS + YOUR EXACT TIMINGS */
+/* ===============================
+   NO BUTTON MOVEMENT (CLAMPED)
+================================ */
+function getClampedPosition(button) {
+  const maxX = window.innerWidth / 2 - 120;
+  const maxY = window.innerHeight / 2 - 180;
+
+  const x = Math.max(
+    -maxX,
+    Math.min(maxX, Math.random() * 240 - 120)
+  );
+
+  const y = Math.max(
+    -maxY,
+    Math.min(maxY, Math.random() * 120 - 60)
+  );
+
+  return { x, y };
+}
+
+/* ===============================
+   FINAL PAGE GIF CAROUSEL
+================================ */
 const gifs = [
-  { src: "https://media0.giphy.com/media/v1.Y2lkPTc5MGI3NjExdHJydXd1cjBveTJsNjFpamtsMzc1MGI1YjhueWExc2c0cjRyeGVkaCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/jIUe9WT7p1X5cdU3hM/giphy.gif", time: 1300 },
-  { src: "https://media1.giphy.com/media/v1.Y2lkPTc5MGI3NjExMDByNXh6cXJveHVtaW5lNDJuZzZiZjF3aml5dndxYnowMWRsYjNmbyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/C4bqFGCVg9L4cPLPhF/giphy.gif", time: 500 },
-  { src: "https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExMnJhN2E4b3EzaTU3eHdvNnMya2Q4OWx0anZ4ZG1tOGV0ZGU2cDMydyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/lgcUUCXgC8mEo/giphy.gif", time: 700 },
-  { src: "https://media0.giphy.com/media/v1.Y2lkPTc5MGI3NjExb2Jlbmhrb2lpazlpYjB2ZzFzc3psbWNndTc3emduaTBiZ281dWJzYSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/qCbxDK31NoH03SwomM/giphy.gif", time: 2600 },
-  { src: "https://media1.giphy.com/media/v1.Y2lkPTc5MGI3NjExNnp6YWMwY2RteGtrM2g4bjZiNmthM3ZreHQycWFyczNzeGswNDh6NiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/tgSPq03054DTy/giphy.gif", time: 900 },
-  { src: "https://media0.giphy.com/media/v1.Y2lkPTc5MGI3NjExYXk3b3BwbXcwazh5NmNkMDYyODR0cHB4b3QybWc3cWFhazUzdDZmOCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/lxxOGaDRk4f7R5TkBd/giphy.gif", time: 3800 },
-  { src: "https://media0.giphy.com/media/v1.Y2lkPTc5MGI3NjExamY0ZDVqY2RqbDZ4eDN5MTR1d2tjOWVyc3FrcXlzcWhpYWdrOG5hMyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/iXbnkZTxCo4t8l8mxK/giphy.gif", time: 3400 },
-  { src: "https://media2.giphy.com/media/v1.Y2lkPTc5MGI3NjExcG53Ynl6NzNycXNscGZkemVxN2t4dTRudDk4MXB1dHJmaWdxMXNzNCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/fQvs6RzNAfWnga6f6I/giphy.gif", time: 3050 },
-  { src: "https://media2.giphy.com/media/v1.Y2lkPTc5MGI3NjExMzdiZms1OXdtYjg1a3VjbTBndnU3ZWwwejAweDRhY2JvZm93bmMzNyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/yziuK6WtDFMly/giphy.gif", time: 1600 }
+  { src: "gifs/gif1.gif", time: 1300 },
+  { src: "gifs/gif2.gif", time: 500 },
+  { src: "gifs/gif3.gif", time: 700 },
+  { src: "gifs/gif4.gif", time: 2600 },
+  { src: "gifs/gif5.gif", time: 900 },
+  { src: "gifs/gif6.gif", time: 3800 },
+  { src: "gifs/gif7.gif", time: 3400 },
+  { src: "gifs/gif8.gif", time: 3050 },
+  { src: "gifs/gif9.gif", time: 1600 }
 ];
 
 let gifIndex = 0;
 
-function startGifLoop() {
+function startGifCarousel() {
   showGif();
 }
 
 function showGif() {
-  gifEl.src = gifs[gifIndex].src;
+  gifImg.src = gifs[gifIndex].src;
 
   setTimeout(() => {
     gifIndex = (gifIndex + 1) % gifs.length;
     showGif();
   }, gifs[gifIndex].time);
-}
-
-/* HELPERS */
-function random(min, max) {
-  return Math.random() * (max - min) + min;
-}
-
-function clamp(value, min, max) {
-  return Math.max(min, Math.min(max, value));
 }
